@@ -14,7 +14,7 @@ class TrackerBloc extends Bloc<TrackerEvent, TrackerState> {
       final List<MedicationReminder> list = await service.getAllTracker();
       final TrackerStatus status;
       try {
-        if (list != null && list.isNotEmpty) {
+        if (list.isNotEmpty) {
           status = TrackerStatus.success;
         } else {
           status = TrackerStatus.error;
@@ -33,7 +33,30 @@ class TrackerBloc extends Bloc<TrackerEvent, TrackerState> {
         );
       }
     });
+    
+    on<GetTrackerByDateTimeEvent>((event, emit) async {
+      final MedicationService service = MedicationService();
+      final List<MedicationReminder> list = await service.getTrackerByDateTime(event.dateTime);
+      try {
+        emit(state.copyWith(
+          status: TrackerStatus.success,
+          list: list,
+        ));
+      } catch (e) {
+        emit(
+          state.copyWith(
+            status: TrackerStatus.error,
+            list: list,
+            error: e.toString(),
+          ),
+        );
+      }
+    });
 
     on<ToggleCheckTrackerEvent>((event, emit) {});
+
+    on<CreateMedicationEvent>((event, emit) {
+
+    });
   }
 }

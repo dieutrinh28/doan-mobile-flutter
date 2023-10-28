@@ -1,10 +1,13 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:medicine_reminder/bloc/tracker_bloc.dart';
+import 'package:medicine_reminder/bloc/auth/auth_bloc.dart';
+import 'package:medicine_reminder/bloc/event_calendar/event_calendar_bloc.dart';
+import 'package:medicine_reminder/bloc/tracker/tracker_bloc.dart';
 import 'package:medicine_reminder/config/color_palette.dart';
 import 'package:medicine_reminder/config/text_styles.dart';
 import 'package:medicine_reminder/config/util.dart';
+import 'package:medicine_reminder/view/create_tracker_screen.dart';
 import 'package:medicine_reminder/widget/tracker_card.dart';
 
 class MedicationTrackerScreen extends StatefulWidget {
@@ -17,18 +20,18 @@ class MedicationTrackerScreen extends StatefulWidget {
 
 class _MedicationTrackerScreenState extends State<MedicationTrackerScreen> {
   DateTime selectedDate = DateTime.now();
-  late TrackerBloc trackerBloc;
-  
+
   @override
   void initState() {
     super.initState();
-    trackerBloc = BlocProvider.of<TrackerBloc>(context)..add(GetAllTrackerEvent());
   }
 
   @override
   Widget build(BuildContext context) {
-    print('build nef');
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Reminder App"),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -37,42 +40,31 @@ class _MedicationTrackerScreenState extends State<MedicationTrackerScreen> {
             children: [
               buildTitleCard(),
               buildDateTracker(),
-              BlocBuilder<TrackerBloc, TrackerState>(
-                builder: (context, state) {
-                  final list = state.list;
-                  final status = state.status;
-                  print('build nua nef');
-                  return Flexible(
-                    child: ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: list?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          final item = list?[index];
-                          if (status == TrackerStatus.success) {
-                            print('true');
-                            return TrackerCard(medicationReminder: item!);
-                          } else {
-                            print('false');
-                            return const Center(child: CircularProgressIndicator());
-                          }
-                        }),
-                  );
-                },
-              )
-              // builderDetailDate(),
+              builderDetailDate(),
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const CreateTrackerScreen(),
+            ),
+          );
+        },
+        child: const Icon(Icons.add, color: ColorPalette.blueBase,),
+        backgroundColor: ColorPalette.blueLight,
       ),
     );
   }
 
   Widget buildTitleCard() {
-    return Card(
-      margin: const EdgeInsets.all(16),
+    return const Card(
+      margin: EdgeInsets.all(16),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -95,10 +87,13 @@ class _MedicationTrackerScreenState extends State<MedicationTrackerScreen> {
         initialSelectedDate: DateTime.now(),
         selectionColor: ColorPalette.blueLight,
         selectedTextColor: ColorPalette.blueBase,
-        daysCount: 30,
+        daysCount: 45,
         onDateChange: (date) {
           setState(() {
             selectedDate = date;
+            BlocProvider.of<TrackerBloc>(context).add(
+              GetTrackerByDateTimeEvent(selectedDate)
+            );
           });
         },
       ),
@@ -116,27 +111,27 @@ class _MedicationTrackerScreenState extends State<MedicationTrackerScreen> {
             MedicineUtil.formatDateTime(selectedDate),
             style: TextStyles.semiBold,
           ),
-          BlocProvider<TrackerBloc>(
-            create: (context) => TrackerBloc(),
-            child: BlocBuilder<TrackerBloc, TrackerState>(
-              builder: (context, state) {
-                final list = state.list;
-                final status = state.status;
+          BlocBuilder<TrackerBloc, TrackerState>(
+            builder: (context, state) {
+              if (state.status == TrackerStatus.success) {
+                final list = state.list ?? [];
+                if (list.isEmpty) {
+                  return const Text("Don't have reminder");
+                }
                 return Flexible(
                   child: ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: list.length,
                       itemBuilder: (context, index) {
-                    final item = list?[index];
-                    if (status == TrackerStatus.success) {
-                      return TrackerCard(medicationReminder: item!);
-                    } else {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  }),
+                        final item = list[index];
+                        return TrackerCard(medicationReminder: item);
+                      }),
                 );
-              },
-            ),
+              } else {
+                return Text("Error ${state.error}");
+              }
+            },
           )
         ],
       ),

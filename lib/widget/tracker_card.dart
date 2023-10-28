@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medicine_reminder/config/text_styles.dart';
+import 'package:medicine_reminder/model/event_calendar.dart';
 import 'package:medicine_reminder/model/medication_reminder.dart';
 
 class TrackerCard extends StatefulWidget {
@@ -28,7 +29,9 @@ class _TrackerCardState extends State<TrackerCard> {
               )
             : IconButton(
                 onPressed: () {},
-                icon: const Icon(Icons.check_box_outline_blank),
+                icon: const Icon(
+                  Icons.check_box_outline_blank,
+                ),
               ),
       ),
     );
