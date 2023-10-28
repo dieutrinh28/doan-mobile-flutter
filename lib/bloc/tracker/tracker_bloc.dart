@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:medicine_reminder/config/common_enum.dart';
 import 'package:medicine_reminder/model/medication_reminder.dart';
 import 'package:medicine_reminder/service/medication_service.dart';
 
@@ -33,10 +34,11 @@ class TrackerBloc extends Bloc<TrackerEvent, TrackerState> {
         );
       }
     });
-    
+
     on<GetTrackerByDateTimeEvent>((event, emit) async {
       final MedicationService service = MedicationService();
-      final List<MedicationReminder> list = await service.getTrackerByDateTime(event.dateTime);
+      final List<MedicationReminder> list =
+          await service.getTrackerByDateTime(event.dateTime);
       try {
         emit(state.copyWith(
           status: TrackerStatus.success,
@@ -55,8 +57,29 @@ class TrackerBloc extends Bloc<TrackerEvent, TrackerState> {
 
     on<ToggleCheckTrackerEvent>((event, emit) {});
 
-    on<CreateMedicationEvent>((event, emit) {
-
+    on<CreateMedicationEvent>((event, emit) async {
+      final MedicationService service = MedicationService();
+      try {
+        await service.createTracker(
+          medicationName: event.medicationName,
+          startTime: event.startDate,
+          endTime: event.endDate,
+          medicineType: event.medicineType,
+          doseType: event.doseType,
+          doseAmount: event.doseAmount,
+          note: event.note,
+        );
+        emit(state.copyWith(
+          status: TrackerStatus.success,
+        ));
+      } catch (e) {
+        emit(
+          state.copyWith(
+            status: TrackerStatus.error,
+            error: e.toString(),
+          ),
+        );
+      }
     });
   }
 }

@@ -28,19 +28,31 @@ class ToggleCheckTrackerEvent extends TrackerEvent {
 
 class CreateMedicationEvent extends TrackerEvent {
   final String medicationName;
-  final DateTime start;
-  final DateTime end;
+  final DateTime startDate;
+  final DateTime endDate;
+  final MedicineType medicineType;
+  final DoseType doseType;
+  final int doseAmount;
+  final String note;
 
   CreateMedicationEvent({
     required this.medicationName,
-    required this.start,
-    required this.end,
+    required this.startDate,
+    required this.endDate,
+    required this.medicineType,
+    required this.doseType,
+    required this.doseAmount,
+    required this.note,
   });
 
   @override
   List<Object?> get props => [
         medicationName,
-        start,
-        end,
+        startDate,
+        endDate,
+        medicineType,
+        doseType,
+        doseAmount,
+        note,
       ];
 }

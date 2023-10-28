@@ -14,6 +14,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final UserCredential? userCredential = await googleAuth.signInWithGoogle();
       if (userCredential != null) {
         final accessToken = await googleAuth.getAccessToken();
+        print('accessToken: $accessToken');
         emit(state.copyWith(status: AuthStatus.authenticated, accessToken: accessToken));
       }
       else {

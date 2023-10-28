@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:googleapis/cloudsearch/v1.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:medicine_reminder/config/common_enum.dart';
 import 'package:medicine_reminder/config/util.dart';
 
 enum TimeReminder { morning, lunch, dinner }
@@ -12,6 +12,9 @@ class MedicationReminder extends Equatable {
   final String? imageUrl;
   final DateTime? startTime;
   final DateTime? endTime;
+  final MedicineType? medicineType;
+  final DoseType? doseType;
+  final int? doseAmount;
   final String? note;
   final bool? isDone;
 
@@ -21,6 +24,9 @@ class MedicationReminder extends Equatable {
     this.imageUrl,
     this.startTime,
     this.endTime,
+    this.medicineType,
+    this.doseType,
+    this.doseAmount,
     this.note,
     this.isDone,
   });
@@ -31,6 +37,9 @@ class MedicationReminder extends Equatable {
     String? imageUrl,
     DateTime? startTime,
     DateTime? endTime,
+    MedicineType? medicineType,
+    DoseType? doseType,
+    int? doseAmount,
     String? note,
     bool? isDone,
   }) {
@@ -40,6 +49,9 @@ class MedicationReminder extends Equatable {
       imageUrl: imageUrl ?? this.imageUrl,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
+      medicineType: medicineType ?? this.medicineType,
+      doseType: doseType ?? this.doseType,
+      doseAmount: doseAmount ?? this.doseAmount,
       note: note ?? this.note,
       isDone: isDone ?? this.isDone,
     );
@@ -55,6 +67,9 @@ class MedicationReminder extends Equatable {
       imageUrl: json['image_url'],
       startTime: json['start_time']?.toDate(),
       endTime: json['end_time']?.toDate(),
+      medicineType: MedicineTypeExtension.fromInt(json['medicine_type']),
+      doseType: DoseTypeExtension.fromInt(json['dose_type']),
+      doseAmount: json['dose_amount'],
       note: json['note'],
       isDone: json['is_done'],
     );
@@ -69,6 +84,10 @@ class MedicationReminder extends Equatable {
           MedicineUtil.convertDateTimeToTimestamp(startTime ?? DateTime.now()),
       'end_time':
           MedicineUtil.convertDateTimeToTimestamp(endTime ?? DateTime.now()),
+      'medicine_type':
+          MedicineTypeExtension.toInt(medicineType ?? MedicineType.Tablet),
+      'dose_type': DoseTypeExtension.toInt(doseType ?? DoseType.pills),
+      'dose_amount': doseAmount,
       'note': note,
       'is_done': isDone,
     };
@@ -81,6 +100,9 @@ class MedicationReminder extends Equatable {
         imageUrl,
         startTime,
         endTime,
+        medicineType,
+        doseType,
+        doseAmount,
         note,
         isDone,
       ];

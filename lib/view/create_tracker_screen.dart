@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
 import 'package:medicine_reminder/bloc/auth/auth_bloc.dart';
 import 'package:medicine_reminder/bloc/event_calendar/event_calendar_bloc.dart';
+import 'package:medicine_reminder/bloc/tracker/tracker_bloc.dart';
 import 'package:medicine_reminder/config/color_palette.dart';
+import 'package:medicine_reminder/config/common_enum.dart';
 import 'package:medicine_reminder/config/util.dart';
 
 class CreateTrackerScreen extends StatefulWidget {
@@ -14,22 +16,16 @@ class CreateTrackerScreen extends StatefulWidget {
 }
 
 class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
-  int _dropdownValue = 0;
-  List<String> medicineType = [
-    'Tablet',
-    'Capsules',
-    'Syrup',
-    'Liquid',
-  ];
-  String selectedValue = 'Tablet';
-
+  MedicineType selectedMedicineType = MedicineType.Tablet;
+  DoseType selectedDoseType = DoseType.pills;
   TextEditingController medicineName = TextEditingController();
+  TextEditingController doseAmount = TextEditingController();
+  TextEditingController note = TextEditingController();
   DateTime? startDate;
   DateTime? endDate;
-
   TimeOfDay? startTime;
   TimeOfDay? endTime;
-
+  bool isCheckbox = false;
 
   @override
   void dispose() {
@@ -45,6 +41,15 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
       endDate: endDate ?? DateTime.now(),
       endTime: endTime ?? TimeOfDay.now(),
       accessToken: context.read<AuthBloc>().state.accessToken ?? '',
+    ));
+    BlocProvider.of<TrackerBloc>(context).add(CreateMedicationEvent(
+      medicationName: medicineName.text,
+      startDate: startDate ?? DateTime.now(),
+      endDate: endDate ?? DateTime.now(),
+      medicineType: selectedMedicineType,
+      doseType: selectedDoseType,
+      doseAmount: int.parse(doseAmount.text),
+      note: note.text,
     ));
   }
 
@@ -95,8 +100,10 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
                           child: ListView.builder(
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
-                              itemCount: medicineType.length,
+                              itemCount: MedicineType.values.length,
                               itemBuilder: (context, index) {
+                                List<MedicineType> medicineType =
+                                    MedicineType.values;
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 8.0),
                                   child: ChoiceChip(
@@ -105,13 +112,16 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                         side: BorderSide.none),
-                                    label: Text('${medicineType[index]}'),
-                                    selected:
-                                        selectedValue == medicineType[index],
+                                    label: Text(
+                                      medicineTypeToString(medicineType[index]),
+                                    ),
+                                    selected: selectedMedicineType ==
+                                        medicineType[index],
                                     onSelected: (bool selected) {
                                       if (selected) {
                                         setState(() {
-                                          selectedValue = medicineType[index];
+                                          selectedMedicineType =
+                                              medicineType[index];
                                         });
                                       } else {}
                                     },
@@ -123,11 +133,20 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
                           height: 18,
                         ),
                         const Text("Dose"),
+                        const SizedBox(
+                          height: 8,
+                        ),
                         Row(
                           children: [
                             Expanded(
                               flex: 2,
                               child: TextField(
+                                controller: doseAmount,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: <TextInputFormatter>[
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9]')),
+                                ],
                                 decoration: InputDecoration(
                                   contentPadding: const EdgeInsets.only(
                                       left: 16, top: 8, bottom: 8),
@@ -151,26 +170,40 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
                                 decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: ColorPalette.grayDark,
-                                      width: 1.0,
-                                      style: BorderStyle.solid,
-                                    )),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: ColorPalette.grayDark,
+                                    width: 1.0,
+                                    style: BorderStyle.solid,
+                                  ),
+                                ),
                                 child: DropdownButtonHideUnderline(
                                   child: DropdownButton(
-                                    value: _dropdownValue,
-                                    items: const [
+                                    value: selectedDoseType,
+                                    items: [
                                       DropdownMenuItem(
-                                          value: 0, child: Text('pills')),
+                                        value: DoseType.pills,
+                                        child: Text(
+                                          doseTypeToString(DoseType.pills),
+                                        ),
+                                      ),
                                       DropdownMenuItem(
-                                          value: 1, child: Text('mg')),
+                                        value: DoseType.mg,
+                                        child: Text(
+                                          doseTypeToString(DoseType.mg),
+                                        ),
+                                      ),
                                       DropdownMenuItem(
-                                          value: 2, child: Text('ml')),
+                                        value: DoseType.ml,
+                                        child: Text(
+                                          doseTypeToString(DoseType.ml),
+                                        ),
+                                      ),
                                     ],
-                                    onChanged: (int? selectedValue) {
+                                    onChanged: (DoseType? selectedValue) {
                                       setState(() {
-                                        _dropdownValue = selectedValue!;
+                                        selectedDoseType =
+                                            selectedValue ?? DoseType.pills;
                                       });
                                     },
                                   ),
@@ -178,6 +211,28 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(
+                          height: 18,
+                        ),
+                        const Text("Note"),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        TextField(
+                          controller: note,
+                          decoration: InputDecoration(
+                            contentPadding:
+                            const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: ColorPalette.grayLight,
+                                width: 1.0,
+                                style: BorderStyle.solid,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -208,7 +263,7 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
                           ],
                         ),
                         const SizedBox(
-                          height: 8,
+                          height: 18,
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -225,11 +280,27 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
                                   });
                                 }),
                           ],
-                        )
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            const Text('Repeat daily for 5 days'),
+                            const SizedBox(width: 18,),
+                            Checkbox(value: isCheckbox, onChanged: (bool? value) {
+                              setState(() {
+                                isCheckbox = value ?? false;
+                              });
+                            },)
+                          ],
+                        ),
                       ],
                     ),
                   ),
                 ),
+                SizedBox(height: 30,),
                 Container(
                   decoration: BoxDecoration(
                     color: ColorPalette.blueBase,
@@ -260,18 +331,6 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
   }) {
     return InkWell(
       onTap: () async {
-        // final selectedDate = await showRoundedDatePicker(
-        //   context: context,
-        //   initialDate: dateTime ?? DateTime.now(),
-        //   firstDate: DateTime(DateTime.now().year - 1),
-        //   lastDate: DateTime(DateTime.now().year + 1),
-        //   borderRadius: 16,
-        // );
-        //
-        // if (selectedDate != null && onDateTimeSelected != null) {
-        //   onDateTimeSelected(selectedDate);
-        // }
-
         final selectedDate = await showDatePicker(
           context: context,
           initialDate: date ?? DateTime.now(),
@@ -283,6 +342,7 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
           context: context,
           initialTime: time ?? TimeOfDay.now(),
         );
+
         if (selectedDate != null &&
             selectedTime != null &&
             onDateTimeSelected != null) {
@@ -307,7 +367,8 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
             ),
             Text(
               MedicineUtil.formatDateTimeOfDay(
-                date ?? DateTime.now(), time ?? TimeOfDay.now(),
+                date ?? DateTime.now(),
+                time ?? TimeOfDay.now(),
               ),
             ),
           ],

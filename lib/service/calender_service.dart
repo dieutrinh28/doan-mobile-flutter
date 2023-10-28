@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:googleapis/calendar/v3.dart';
-import 'package:googleapis/cloudsearch/v1.dart';
 import 'package:medicine_reminder/model/event_calendar.dart';
 import 'package:medicine_reminder/service/calendar_auth.dart';
 import 'package:http/http.dart' as http;
@@ -138,15 +137,17 @@ class CalendarService {
     final requestBody = json.encode({
       'summary': medicationName,
       'start': {
-        'dateTime': start
+        'dateTime': start,
+        'timeZone': 'Asia/Ho_Chi_Minh'
       },
       'end': {
-        'dateTime': end
+        'dateTime': end,
+        'timeZone': 'Asia/Ho_Chi_Minh'
       },
       'description': "Đến giờ uống thuốc rồi",
       'recurrence': [
         'RRULE:FREQ=DAILY;COUNT=2',
-      ].toString(),
+      ],
       'reminders': {
         'useDefault': true,
       }
@@ -166,7 +167,7 @@ class CalendarService {
       print(response.body);
     } else {
       print("Error: ${response.statusCode}");
-      print("${requestBody.toString()}");
+      print("${response.body.toString()}");
       throw Exception(
           'Failed to create calendar event. Status Code: ${response.statusCode}');
     }
