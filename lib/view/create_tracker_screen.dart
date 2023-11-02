@@ -57,7 +57,7 @@ class _CreateTrackerScreenState extends State<CreateTrackerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create'),
+        title: Text('Create Medicine Reminder'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

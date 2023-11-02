@@ -56,3 +56,5 @@ class CreateMedicationEvent extends TrackerEvent {
         note,
       ];
 }
+
+

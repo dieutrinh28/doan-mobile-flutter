@@ -23,11 +23,9 @@ class GoogleAuth {
             await auth.signInWithCredential(googleCredential);
         return userCredential;
       } else {
-        print('Google signing in failed');
         return null;
       }
     } on FirebaseAuthException catch (e) {
-      print('Error signing in with Google: $e');
       return null;
     }
   }
@@ -51,11 +49,9 @@ class GoogleAuth {
         final String accessToken = googleAuth.accessToken!;
         return accessToken;
       } else {
-        print('Google signing in failed');
         return null;
       }
     } on FirebaseAuthException catch (e) {
-      print('Error signing in with Google: $e');
       return null;
     }
   }

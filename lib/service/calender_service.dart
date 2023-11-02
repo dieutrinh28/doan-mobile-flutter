@@ -146,7 +146,7 @@ class CalendarService {
       },
       'description': "Đến giờ uống thuốc rồi",
       'recurrence': [
-        'RRULE:FREQ=DAILY;COUNT=2',
+        'RRULE:FREQ=DAILY;COUNT=5',
       ],
       'reminders': {
         'useDefault': true,

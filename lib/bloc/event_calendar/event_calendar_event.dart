@@ -6,11 +6,9 @@ abstract class EventCalendarEvent extends Equatable {
 
 class GetAllEventCalendarEvent extends EventCalendarEvent {
   final String accessToken;
-
   GetAllEventCalendarEvent({
     required this.accessToken,
   });
-
   @override
   List<Object?> get props => [
         accessToken,
@@ -20,12 +18,10 @@ class GetAllEventCalendarEvent extends EventCalendarEvent {
 class GetEventCalendarByDateTimeEvent extends EventCalendarEvent {
   final DateTime dateTime;
   final String accessToken;
-
   GetEventCalendarByDateTimeEvent({
     required this.dateTime,
     required this.accessToken,
   });
-
   @override
   List<Object?> get props => [
         dateTime,
