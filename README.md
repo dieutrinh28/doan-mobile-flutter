@@ -4,13 +4,16 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Clone the application
 
-A few resources to get you started if this is your first Flutter project:
+git clone git@github.com:dieutrinh28/medicine_reminder.git
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Install the dependencies
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+cd medicine_reminder
+flutter clean
+flutter pub get
+
+Run the application
+
+flutter run
